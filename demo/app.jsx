@@ -61,21 +61,22 @@ var DemoApp = React.createClass({
    *
    */
   render: function() {
-    return (<div className="component-demo-app">
-            <Growl ref="growler"></Growl>
-            <form onSubmit={this.handleNotificationTrigger}>
-            <h3>Trigger a growl notification.</h3>
-            <select name="level" id="growlLevel">
+    return (
+      <div className="component-demo-app">
+        <Growl ref="growler"></Growl>
+        <form onSubmit={this.handleNotificationTrigger}>
+          <h3>Trigger a growl notification.</h3>
+          <select name="level" id="growlLevel">
             <option value="info">Info</option>
             <option value="warn">Warn</option>
             <option value="error">Error</option>
             <option value="success">Success</option>
-            </select>
-            <input type="text" name="msg" id="growlMsg" />
-            <input type="submit" value="Growl!" />
-            </form>
-            </div>
-           );
+          </select>
+          <input type="text" name="msg" id="growlMsg" />
+          <input type="submit" value="Growl!" />
+        </form>
+      </div>
+    );
   }
 
 });
