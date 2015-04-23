@@ -1,6 +1,6 @@
 /** @jsx React.DOM */
 var React = window.React = require('react');
-var Growl = require('./Growl/growl.react');
+var Growl = require('../src/growl.react');
 
 var DemoApp = React.createClass({
 
@@ -27,9 +27,6 @@ var DemoApp = React.createClass({
     }
 
     this.growler = this.refs.growler;
-
-    var self = this;
-
   },
 
   /*
@@ -47,7 +44,6 @@ var DemoApp = React.createClass({
    */
   handleNotificationTrigger: function(e) {
     e.preventDefault();
-    var form = e.target;
     var lvl = document.getElementById('growlLevel').value;
     var msg = document.getElementById('growlMsg').value;
 

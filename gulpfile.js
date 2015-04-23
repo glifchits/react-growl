@@ -10,36 +10,42 @@ var path = require('path');
 var browserify = require('browserify');
 var source = require('vinyl-source-stream');
 
+
 gulp.task('styles', function () {
-  return gulp.src('app/styles/main.scss')
+  return gulp.src('./demo/main.scss')
     .pipe($.plumber())
     .pipe($.rubySass({
       style: 'expanded',
       precision: 10
     }))
     .pipe($.autoprefixer({browsers: ['last 1 version']}))
-    .pipe(gulp.dest('.tmp/styles'));
+    .pipe(gulp.dest('.tmp'));
 });
 
+
 gulp.task('jshint', function () {
-  return gulp.src(['./app/scripts/*.js', './app/scripts/*.jsx'])
+  return gulp.src([
+    './demo/**/*.js', './demo/**/*.jsx',
+    './src/**/*.js', './src/**/*.jsx'
+  ])
     .pipe($.jsxtransform())
     .pipe($.jshint())
     .pipe($.jshint.reporter('jshint-stylish'))
-    .pipe($.jshint.reporter('fail'));
 });
 
+
 gulp.task('scripts', function () {
-  return browserify('./app/scripts/app.js')
+  return browserify('./demo/app.jsx')
     .bundle()
-    .pipe(source('app.js'))
-    .pipe(gulp.dest('.tmp/scripts'));
+    .pipe(source('./demo/app.js'))
+    .pipe(gulp.dest('.tmp'));
 });
+
 
 gulp.task('html', ['styles', 'scripts'], function () {
   var assets = $.useref.assets({searchPath: '{.tmp,app}'});
 
-  return gulp.src('app/*.html')
+  return gulp.src('./demo/*.html')
     .pipe(assets)
     .pipe($.if('*.js', $.uglify()))
     .pipe($.if('*.css', $.csso()))
@@ -49,28 +55,10 @@ gulp.task('html', ['styles', 'scripts'], function () {
     .pipe(gulp.dest('dist'));
 });
 
-gulp.task('images', function () {
-  return gulp.src('app/images/**/*')
-    .pipe($.cache($.imagemin({
-      progressive: true,
-      interlaced: true
-    })))
-    .pipe(gulp.dest('dist/images'));
-});
-
-gulp.task('fonts', function () {
-  return gulp.src(require('main-bower-files')().concat('app/fonts/**/*'))
-    .pipe($.filter('**/*.{eot,svg,ttf,woff}'))
-    .pipe($.flatten())
-    .pipe(gulp.dest('dist/fonts'));
-});
-
-
-
 
 gulp.task('jest', function () {
   var nodeModules = path.resolve('./node_modules');
-  return gulp.src('app/scripts/**/__tests__')
+  return gulp.src('app/**/__tests__')
     .pipe($.jest({
         scriptPreprocessor: nodeModules + '/gulp-jest/preprocessor.js',
         unmockedModulePathPatterns: [nodeModules + '/react']
@@ -80,15 +68,17 @@ gulp.task('jest', function () {
 
 gulp.task('extras', function () {
   return gulp.src([
-    'app/*.*',
-    '!app/*.html',
+    'demo/*.*',
+    '!demo/*.html',
     'node_modules/apache-server-configs/dist/.htaccess'
   ], {
     dot: true
   }).pipe(gulp.dest('dist'));
 });
 
+
 gulp.task('clean', require('del').bind(null, ['.tmp', 'dist']));
+
 
 gulp.task('connect', ['styles', 'scripts'], function () {
   var serveStatic = require('serve-static');
@@ -96,11 +86,11 @@ gulp.task('connect', ['styles', 'scripts'], function () {
   var app = require('connect')()
     .use(require('connect-livereload')({port: 35729}))
     .use(serveStatic('.tmp'))
-    .use(serveStatic('app'))
+    .use(serveStatic('demo'))
     // paths to bower_components should be relative to the current file
     // e.g. in app/index.html you should use ../bower_components
     .use('/bower_components', serveStatic('bower_components'))
-    .use(serveIndex('app'));
+    .use(serveIndex('demo'));
 
   require('http').createServer(app)
     .listen(9000)
@@ -109,46 +99,48 @@ gulp.task('connect', ['styles', 'scripts'], function () {
     });
 });
 
+
 gulp.task('serve', ['connect', 'watch'], function () {
   require('opn')('http://localhost:9000');
 });
+
 
 // inject bower components
 gulp.task('wiredep', function () {
   var wiredep = require('wiredep').stream;
 
-  gulp.src('app/styles/*.scss')
+  gulp.src('./demo/*.scss')
     .pipe(wiredep())
-    .pipe(gulp.dest('app/styles'));
+    .pipe(gulp.dest('demo'));
 
-  gulp.src('app/*.html')
+  gulp.src('./demo/*.html')
     .pipe(wiredep())
-    .pipe(gulp.dest('app'));
+    .pipe(gulp.dest('demo'));
 });
+
 
 gulp.task('watch', ['connect'], function () {
   $.livereload.listen();
 
   // watch for changes
   gulp.watch([
-    'app/*.html',
-    '.tmp/styles/**/*.css',
-    '.tmp/scripts/**/*.js',
-    'app/images/**/*'
+    './demo/*.html',
+    '.tmp/**/*.css',
+    '.tmp/**/*.js',
   ]).on('change', $.livereload.changed);
 
-  gulp.watch('app/styles/**/*.scss', ['styles']);
+  gulp.watch('./demo/**/*.scss', ['.']);
   gulp.watch('bower.json', ['wiredep']);
 
-  
-
   // Watch .js files
-  gulp.watch('app/scripts/**/*.js', ['scripts', 'jest' ]);
+  gulp.watch('./src/**/*.js', ['scripts', 'jest' ]);
 });
 
-gulp.task('build', ['jshint', 'html', 'images', 'fonts', 'jade', 'jest', 'extras'], function () {
+
+gulp.task('build', ['jshint', 'html', 'jest', 'extras'], function () {
   return gulp.src('dist/**/*').pipe($.size({title: 'build', gzip: true}));
 });
+
 
 gulp.task('default', ['clean'], function () {
   gulp.start('build');
