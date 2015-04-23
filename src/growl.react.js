@@ -4,14 +4,26 @@ var SingleGrowl = require('./single-growl.react.js');
 // Private vars
 var holder = null;
 var position = "br";
-var valid_positions = ["tl", "tr", "bl", "br", "tc", "bc"];
+var VALID_POSITIONS = ["tl", "tr", "bl", "br", "tc", "bc"];
 var delay = 3000;
 var animations = true;
 var maxShown = 8;
 
+
+function inArray(needle, haystack) {
+  var length = haystack.length;
+  for(var i=0; i < length; i++) {
+    if(haystack[i] == needle) {
+      return true;
+    }
+  }
+  return false;
+}
+
+
 var movePosition = function() {
   var y = position.slice(0, 1);
-  if(y == "t") {
+  if(y === "t") {
     holder.style.top = "0px";
     holder.style.bottom = "auto";
   } else {
@@ -20,10 +32,10 @@ var movePosition = function() {
   }
 
   var x = position.slice(1, 2);
-  if(x == "l") {
+  if(x === "l") {
     holder.style.left = "0px";
     holder.style.right = "auto";
-  } else if(x == "r") {
+  } else if(x === "r") {
     holder.style.left = "auto";
     holder.style.right = "0px";
   } else {
@@ -50,7 +62,7 @@ var Growl = React.createClass({
   // Use these statics to configure all Growls from anywhere in your application
   statics: {
     setPosition: function(pos) {
-      if(inArray(pos, valid_positions)) {
+      if(inArray(pos, VALID_POSITIONS)) {
         position = pos;
       } else {
         console.log('Unknown position supplied.');
@@ -79,7 +91,7 @@ var Growl = React.createClass({
   getInitialState: function() {
     return {
       notifications: []
-    }
+    };
   },
 
   getDefaultProps: function() {
@@ -96,7 +108,6 @@ var Growl = React.createClass({
 
   addNotification: function(note) {
     var n = this.state.notifications;
-    var self = this;
     try {
       if(note.level) {
         if(!inArray(note.level, this.levels)) {
@@ -127,14 +138,14 @@ var Growl = React.createClass({
   render: function() {
     var that = this;
 
-    if(this.state.notifications.length == 0 ) {
+    if(this.state.notifications.length === 0 ) {
       return <div className="growl-wrapper empty"></div>;
     }
     var isMore = "";
     var count = 0;
     if(this.state.notifications.length > maxShown) {
       var amt = this.state.notifications.length - maxShown;
-      isMore = <li key="more-still"><span>{amt} more</span></li>
+      isMore = <li key="more-still"><span>{amt} more</span></li>;
     }
 
     return (
@@ -145,7 +156,7 @@ var Growl = React.createClass({
         if(count >= maxShown) {
           return "";
         } else {
-          return <SingleGrowl key={n.uid} ref={n.ref} notification={n} onDidRemove={that.handleRemovedNotification} />
+          return <SingleGrowl key={n.uid} ref={n.ref} notification={n} onDidRemove={that.handleRemovedNotification} />;
         }
       })}
       {isMore}
@@ -156,12 +167,6 @@ var Growl = React.createClass({
   }
 });
 
-function inArray(needle, haystack) {
-  var length = haystack.length;
-  for(var i=0; i < length; i++) {
-    if(haystack[i] == needle) return true;
-  }
-  return false;
-}
+
 
 module.exports = Growl;

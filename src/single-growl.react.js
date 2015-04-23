@@ -3,6 +3,26 @@ var React = require('react');
 var animations = true;
 var delay = 3000;
 
+
+/* From Modernizr */
+function whichTransitionEvent(){
+  var t;
+  var el = document.createElement('fakeelement');
+  var transitions = {
+    'transition':'transitionend',
+    'OTransition':'oTransitionEnd',
+    'MozTransition':'transitionend',
+    'WebkitTransition':'webkitTransitionEnd'
+  }
+
+  for(t in transitions){
+    if( el.style[t] !== undefined ){
+      return transitions[t];
+    }
+  }
+}
+
+
 var SingleGrowl = React.createClass({
 
   getInitialState: function() {
@@ -38,7 +58,7 @@ var SingleGrowl = React.createClass({
   getDefaultProps: function() {
     return {
       notification: null,
-      onDidRemove: function(uid) {}
+      onDidRemove: function() {}
     };
   },
 
@@ -84,22 +104,5 @@ var SingleGrowl = React.createClass({
 
 });
 
-/* From Modernizr */
-function whichTransitionEvent(){
-  var t;
-  var el = document.createElement('fakeelement');
-  var transitions = {
-    'transition':'transitionend',
-    'OTransition':'oTransitionEnd',
-    'MozTransition':'transitionend',
-    'WebkitTransition':'webkitTransitionEnd'
-  }
-
-  for(t in transitions){
-    if( el.style[t] !== undefined ){
-      return transitions[t];
-    }
-  }
-}
 
 module.exports = SingleGrowl;
